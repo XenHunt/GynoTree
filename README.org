@@ -3,21 +3,81 @@
 * Описание
 :PROPERTIES:
 :CUSTOM_ID: описание
+:TOC: :ignore (this)
 :END:
 :PROPERTIES:
 :CUSTOM_ID: описание
 
 * Содержание 
 :PROPERTIES:
-:TOC:      :include all :force (depth) :ignore (this описание) :local (depth)
+:TOC:      :include all :force (depth) :ignore (this) :local (depth)
 :CUSTOM_ID: содержание
 :END:
 :CONTENTS:
-- [[#описание][Описание]]
-- [[#тест][Тест]]
+- [[#основные-функции][Основные функции]]
+  - [[#отображение][Отображение]]
+  - [[#добавление][Добавление]]
+  - [[#редактирование][Редактирование]]
+  - [[#удаление][Удаление]]
+- [[#как-запустить][Как запустить]]
+  - [[#бд][БД]]
+  - [[#приложение][Приложение]]
+    - [[#установка-переменных-окружения][Установка переменных окружения]]
+      - [[#direnv][direnv]]
+      - [[#стандартный-способ][Стандартный способ]]
 :END:
 
-* Тест
+* Основные функции
 :PROPERTIES:
-:CUSTOM_ID: тест
+:CUSTOM_ID: основные-функции
+:END:
+
+** TODO Отображение
+:PROPERTIES:
+:CUSTOM_ID: отображение
+:END:
+
+** TODO Добавление
+:PROPERTIES:
+:CUSTOM_ID: добавление
+:END:
+
+** TODO Редактирование
+:PROPERTIES:
+:CUSTOM_ID: редактирование
+:END:
+
+** TODO Удаление
+:PROPERTIES:
+:CUSTOM_ID: удаление
+:END:
+
+* Как запустить
+:PROPERTIES:
+:CUSTOM_ID: как-запустить
+:END:
+
+** TODO БД
+:PROPERTIES:
+:CUSTOM_ID: бд
+:END:
+
+** TODO Приложение
+:PROPERTIES:
+:CUSTOM_ID: приложение
+:END:
+
+*** TODO Установка переменных окружения
+:PROPERTIES:
+:CUSTOM_ID: установка-переменных-окружения
+:END:
+
+**** TODO direnv
+:PROPERTIES:
+:CUSTOM_ID: direnv
+:END:
+
+**** TODO Стандартный способ
+:PROPERTIES:
+:CUSTOM_ID: стандартный-способ
 :END:
