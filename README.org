@@ -1,0 +1,23 @@
+#+TITLE: Web Приложение - генеалогическое древо
+
+* Описание
+:PROPERTIES:
+:CUSTOM_ID: описание
+:END:
+:PROPERTIES:
+:CUSTOM_ID: описание
+
+* Содержание 
+:PROPERTIES:
+:TOC:      :include all :force (depth) :ignore (this описание) :local (depth)
+:CUSTOM_ID: содержание
+:END:
+:CONTENTS:
+- [[#описание][Описание]]
+- [[#тест][Тест]]
+:END:
+
+* Тест
+:PROPERTIES:
+:CUSTOM_ID: тест
+:END:
