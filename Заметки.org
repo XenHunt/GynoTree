@@ -1,0 +1,1 @@
+* D3.Stratify - то что нужно для отображения [[https://observablehq.com/@d3/d3-stratify][Пример]]
