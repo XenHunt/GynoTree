@@ -1,22 +1,40 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import Boolean, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 from typing_extensions import Annotated
+
+
+from typing import Dict
+
+from flask import jsonify
 
 db = SQLAlchemy()
 
 
-class Persons(db.Model):
+class Families(db.Model):  # Семьи
+    id: Mapped[int] = mapped_column(
+        primary_key=True, index=True, autoincrement=True
+    )  # id семьи
+    name: Mapped[str] = mapped_column(String(30), nullable=False)  # имя семьи
+
+
+class Families_Persons(db.Model):  # Связь между семьями и их членами
+    id_family: Mapped[int] = mapped_column(primary_key=True)  # id семьи
+    id_person: Mapped[int] = mapped_column(primary_key=True)  # id члена семьи
+
+
+class Persons(db.Model):  # Член семьи
     id: Mapped[int] = mapped_column(primary_key=True, index=True, autoincrement=True)
     lastname: Mapped[str] = mapped_column(String(30), nullable=False)  # Фамилия
     firstname: Mapped[str] = mapped_column(String(30), nullable=False)  # Имя
     middlename: Mapped[str] = mapped_column(String(30))  # Отчество
+    is_male: Mapped[bool] = mapped_column(Boolean)
 
 
 persons_id = Annotated[int, mapped_column(primary_key=True)]
 
 
-class ParentChildRelationships(db.Model):
+class ParentsChildrenRelationships(db.Model):  # Отношение между Родителями и Детьми
     parent_id: Mapped[persons_id] = mapped_column(
         ForeignKey("persons.id")
     )  # id - родителя
@@ -25,13 +43,8 @@ class ParentChildRelationships(db.Model):
     )  # id - ребенка
 
 
-from typing import Dict
-
-from flask import jsonify
-
-
 def get_persons_with_parents():
-    relationships = ParentChildRelationships.query.all()
+    relationships = ParentsChildrenRelationships.query.all()
     persons_dict: Dict[int, Dict] = {}
 
     for relationship in relationships:
