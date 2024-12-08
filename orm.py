@@ -31,7 +31,7 @@ class Families_Persons(db.Model):  # Связь между семьями и и�
     id_person: Mapped[int] = mapped_column(primary_key=True)  # id члена семьи
 
     @staticmethod
-    def getFamilyPersons(id: int):
+    def getFamilyPersonsAndRoots(id: int):
         with db.session() as s:
             persons = list(
                 map(
@@ -46,11 +46,10 @@ class Families_Persons(db.Model):  # Связь между семьями и и�
                     .scalars()
                     .all(),
                 )
-            )
+            )  # Все люди семьи
 
-            ids = set(int(person["id"]) for person in persons)
+            ids = set(int(person["id"]) for person in persons)  # Их id
 
-            roots = s.execute(select(Persons))
             relation = list(
                 s.execute(
                     select(ParentsChildrenRelationships).filter(
@@ -59,23 +58,25 @@ class Families_Persons(db.Model):  # Связь между семьями и и�
                 )
                 .scalars()
                 .all()
-            )
+            )  # Отношения между членами семьи
 
             def findAllChildren(id: int):
                 return [p.child_id for p in relation if p.parent_id == id]
 
             childrenIds = set(
                 child.child_id for child in relation if child.child_id in ids
-            )
+            )  # Id детей
 
-            persons_without_parents = []
-
-            persons_without_parents
+            persons_without_parents = [
+                person["id"] for person in persons if person["id"] not in childrenIds
+            ]  # Люди без родителей - корни
 
             for i in range(len(persons)):
-                persons[i]["childrenId"] = findAllChildren(persons[i].id)
+                persons[i]["childrenId"] = findAllChildren(
+                    persons[i]["id"]
+                )  # Добавляем детей
 
-            return persons
+            return {"persons": persons, "roots": persons_without_parents}
 
 
 class Persons(db.Model):  # Член семьи
