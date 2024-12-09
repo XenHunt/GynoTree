@@ -58,8 +58,25 @@ def put_person():
     familyId = int(request.json["familyId"])
 
     res, person = Persons.putPerson(person)
-    if res:
-        if Families_Persons.putNewMember(person.id, familyId):
+    if res:  # Человек добавился успешнок
+        if Families_Persons.putNewMember(
+            person.id, familyId
+        ):  # Связь между человеком и семье налажена
             return "Success", 200
         return "Bad family id", 400
     return "Bad person", 400
+
+
+@app.route("/women", methods=["GET"])
+def get_women():
+    return Persons.getAllWomen()
+
+
+@app.route("/men", methods=["GET"])
+def get_men():
+    return Persons.getAllMen()
+
+
+@app.route("/person/<int:id>/parents", methods=["GET"])
+def get_parents(id: int):
+    return Persons.getCurrentParents(id)

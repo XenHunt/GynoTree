@@ -4,7 +4,7 @@ from typing import Dict
 
 from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Boolean, ForeignKey, String, select, update, insert
+from sqlalchemy import Boolean, ForeignKey, String, delete, select, update, insert
 from sqlalchemy.orm import Mapped, mapped_column
 from typing_extensions import Annotated
 
@@ -132,6 +132,79 @@ class Persons(db.Model):  # Член семьи
             ic(e)
             return False, None
         return True, person
+
+    @staticmethod
+    def getAllMen():
+        with db.session() as s:
+            men = list(
+                map(
+                    lambda per: per.toJson(),
+                    s.execute(select(Persons).where(Persons.is_male)).scalars().all(),
+                )
+            )
+            return men
+
+    @staticmethod
+    def getAllWomen():
+        with db.session() as s:
+            women = list(
+                map(
+                    lambda per: per.toJson(),
+                    s.execute(select(Persons).where(Persons.is_male == False))
+                    .scalars()
+                    .all(),
+                )
+            )
+            return ic(women)
+
+    @staticmethod
+    def getCurrentParents(person_id):
+        with db.session() as s:
+            relationships = list(
+                s.execute(
+                    select(Parents_Children_Relationships).filter_by(child_id=person_id)
+                )
+                .scalars()
+                .all()
+            )
+
+            parents = []
+            for relationship in relationships:
+                parent = s.execute(
+                    select(Persons).where(Persons.id == relationship.parent_id)
+                ).scalar()
+                ic(parent)
+                if parent:
+                    parents.append(parent.toJson())
+
+        return parents
+
+    @staticmethod
+    def update_parents(person_id, new_parents):
+        try:
+            with db.engine.connect() as cn:
+                # Delete existing relationships for this person
+                cn.execute(
+                    delete(Parents_Children_Relationships).where(
+                        Parents_Children_Relationships.child_id == person_id
+                    )
+                )
+
+                # Insert new relationships
+                cn.execute(
+                    insert(Parents_Children_Relationships).values(
+                        [
+                            {"parent_id": parent_id, "child_id": person_id}
+                            for parent_id in new_parents.get("ids", [])
+                        ]
+                    )
+                )
+
+                cn.commit()
+                return True
+        except Exception as e:
+            ic(e)
+            return False
 
     def toJson(self):
         return {
