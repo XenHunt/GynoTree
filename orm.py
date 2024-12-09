@@ -96,6 +96,40 @@ class Families_Persons(db.Model):  # Связь между семьями и и�
             return False
         return True
 
+    @staticmethod
+    def getFamilyByPersonId(person_id: int):
+        with db.session() as s:
+            result = s.execute(
+                select(Families)
+                .join(Families_Persons, Families.id == Families_Persons.id_family)
+                .where(Families_Persons.id_person == person_id)
+            ).scalar()
+            if result:
+                return result.toJson()
+            else:
+                return ""
+
+    @staticmethod
+    def movePersonToNewFamily(id_person: int, new_family_id: int) -> bool:
+        try:
+            with db.session() as s:
+
+                s.execute(
+                    delete(Families_Persons).where(
+                        Families_Persons.id_person == id_person
+                    )
+                )
+
+                s.execute(
+                    insert(Families_Persons),
+                    [{"id_family": new_family_id, "id_person": id_person}],
+                )
+                s.commit()
+                return True
+        except Exception as e:
+            ic(e)
+            return False
+
 
 class Persons(db.Model):  # Член семьи
     # __tablename__ = "persons"
@@ -168,14 +202,17 @@ class Persons(db.Model):  # Член семьи
                 .all()
             )
 
-            parents = []
+            parents = {}
             for relationship in relationships:
                 parent = s.execute(
                     select(Persons).where(Persons.id == relationship.parent_id)
                 ).scalar()
                 ic(parent)
                 if parent:
-                    parents.append(parent.toJson())
+                    if parent.is_male:
+                        parents["father"] = parent.toJson()
+                    else:
+                        parents["mother"] = parent.toJson()
 
         return parents
 
@@ -194,8 +231,8 @@ class Persons(db.Model):  # Член семьи
                 cn.execute(
                     insert(Parents_Children_Relationships).values(
                         [
-                            {"parent_id": parent_id, "child_id": person_id}
-                            for parent_id in new_parents.get("ids", [])
+                            {"parent_id": parent["id"], "child_id": person_id}
+                            for parent in new_parents
                         ]
                     )
                 )

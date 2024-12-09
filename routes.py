@@ -27,25 +27,38 @@ def get_families():
         return Families_Persons.getFamilyPersonsAndRoots(id)
 
 
-@app.route("/person/<int:id>", methods=["GET", "UPDATE"])
+@app.route("/person/<int:id>", methods=["GET", "POST", "DELETE"])
 def up_get_person(id: int):
     if request.method == "GET":
         per = Persons.query.where(Persons.id == id).first()
         if isinstance(per, Persons):
-            return per.toJson()
+
+            return ic(
+                {
+                    "person": ic(per.toJson()),
+                    "parents": ic(Persons.getCurrentParents(per.id)),
+                    "family": ic(Families_Persons.getFamilyByPersonId(per.id)),
+                }
+            )
         else:
             return {}
-    else:
+    elif request.method == "POST":
         if not request.json:
             return
         person = request.json["person"]
+        family = request.json["family"]
+        parents = request.json["parents"]
 
         per = Persons.query.where(Persons.id == id).first()
 
         if not isinstance(per, Persons):
             return
         if Persons.updatePerson(id, person):
-            return "Update managed", 200
+            if Families_Persons.movePersonToNewFamily(id, family["id"]):
+                if Persons.update_parents(id, parents):
+                    return "All updated", 200
+                return "Bad parents", 400
+            return "Bad family", 400
         return "Bad payload", 400
 
 
