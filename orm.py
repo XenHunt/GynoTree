@@ -1,9 +1,10 @@
+import os
 from icecream import ic
 from typing import Dict
 
 from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Boolean, ForeignKey, String, select
+from sqlalchemy import Boolean, ForeignKey, String, select, update
 from sqlalchemy.orm import Mapped, mapped_column
 from typing_extensions import Annotated
 
@@ -27,8 +28,12 @@ class Families(db.Model):  # Семьи
 
 
 class Families_Persons(db.Model):  # Связь между семьями и их членами
-    id_family: Mapped[int] = mapped_column(primary_key=True)  # id семьи
-    id_person: Mapped[int] = mapped_column(primary_key=True)  # id члена семьи
+    __tablename__ = "families_persons"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id_family: Mapped[int] = mapped_column(ForeignKey("families.id"))  # id семьи
+    id_person: Mapped[int] = mapped_column(
+        ForeignKey("persons.id"), name="id_person"
+    )  # id члена семьи
 
     @staticmethod
     def getFamilyPersonsAndRoots(id: int):
@@ -52,8 +57,8 @@ class Families_Persons(db.Model):  # Связь между семьями и и�
 
             relation = list(
                 s.execute(
-                    select(ParentsChildrenRelationships).filter(
-                        ParentsChildrenRelationships.child_id.in_(ids)
+                    select(Parents_Children_Relationships).filter(
+                        Parents_Children_Relationships.child_id.in_(ids)
                     )
                 )
                 .scalars()
@@ -80,11 +85,28 @@ class Families_Persons(db.Model):  # Связь между семьями и и�
 
 
 class Persons(db.Model):  # Член семьи
+    # __tablename__ = "persons"
     id: Mapped[int] = mapped_column(primary_key=True, index=True, autoincrement=True)
-    lastName: Mapped[str] = mapped_column(String(30), nullable=False)  # Фамилия
-    firstName: Mapped[str] = mapped_column(String(30), nullable=False)  # Имя
-    middleName: Mapped[str] = mapped_column(String(30))  # Отчество
+    firstName: Mapped[str] = mapped_column(
+        String(30), nullable=False, name="firstname"
+    )  # Имя
+    lastName: Mapped[str] = mapped_column(
+        String(30), nullable=False, name="lastname"
+    )  # Фамилия
+    middleName: Mapped[str] = mapped_column(String(30), name="middlename")  # Отчество
     is_male: Mapped[bool] = mapped_column(Boolean)
+
+    @staticmethod
+    def updatePerson(id, per):
+        try:
+            with db.engine.connect() as cn:
+                ic(cn.execute(update(Persons).where(Persons.id == id).values(**per)))
+                cn.commit()
+        except Exception as e:
+            ic(e)
+            return False
+        return True
+        
 
     def toJson(self):
         return {
@@ -99,17 +121,19 @@ class Persons(db.Model):  # Член семьи
 persons_id = Annotated[int, mapped_column(primary_key=True)]
 
 
-class ParentsChildrenRelationships(db.Model):  # Отношение между Родителями и Детьми
-    parent_id: Mapped[persons_id] = mapped_column(
-        ForeignKey("persons.id")
-    )  # id - родителя
-    child_id: Mapped[persons_id] = mapped_column(
-        ForeignKey("persons.id")
+class Parents_Children_Relationships(db.Model):  # Отношение между Родителями и Детьми
+    __tablename__ = "parents_children_relationships"
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+
+    parent_id: Mapped[int] = mapped_column(ForeignKey("persons.id"))  # id - родителя
+    child_id: Mapped[int] = mapped_column(
+        ForeignKey("persons.id"), name="child_id"
     )  # id - ребенка
 
 
 def get_persons_with_parents():
-    relationships = ParentsChildrenRelationships.query.all()
+    relationships = Parents_Children_Relationships.query.all()
     persons_dict: Dict[int, Dict] = {}
 
     for relationship in relationships:
