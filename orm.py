@@ -144,6 +144,32 @@ class Persons(db.Model):  # Член семьи
     is_male: Mapped[bool] = mapped_column(Boolean)
 
     @staticmethod
+    def deletePerson(person_id):
+        try:
+            with db.session() as s:
+                s.execute(
+                    delete(Parents_Children_Relationships).where(
+                        (Parents_Children_Relationships.parent_id == person_id)
+                        | (Parents_Children_Relationships.child_id == person_id)
+                    )
+                )
+
+                # Удалить запись из Families_Person
+                s.execute(
+                    delete(Families_Persons).where(
+                        Families_Persons.id_person == person_id
+                    )
+                )
+
+                # Удалить самого человека
+                s.execute(delete(Persons).where(Persons.id == person_id))
+                s.commit()
+            return True
+        except Exception as e:
+            ic(e)
+            return False
+
+    @staticmethod
     def updatePerson(id, per):
         try:
             with db.engine.connect() as cn:

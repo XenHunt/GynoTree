@@ -60,6 +60,11 @@ def up_get_person(id: int):
                 return "Bad parents", 400
             return "Bad family", 400
         return "Bad payload", 400
+    else:
+        if Persons.deletePerson(id):
+            return "Deleted", 200
+        return "Bad id", 400
+        
 
 
 @app.route("/person", methods=["PUT"])
