@@ -4,7 +4,7 @@ from typing import Dict
 
 from flask import jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Boolean, ForeignKey, String, select, update
+from sqlalchemy import Boolean, ForeignKey, String, select, update, insert
 from sqlalchemy.orm import Mapped, mapped_column
 from typing_extensions import Annotated
 
@@ -83,6 +83,19 @@ class Families_Persons(db.Model):  # Связь между семьями и и�
 
             return {"persons": persons, "roots": persons_without_parents}
 
+    def putNewMember(id_person, id_family):
+        try:
+            with db.engine.connect() as cn:
+                cn.execute(
+                    insert(Families_Persons),
+                    [{"id_family": id_family, "id_person": id_person}],
+                )
+                cn.commit()
+        except Exception as e:
+            ic(e)
+            return False
+        return True
+
 
 class Persons(db.Model):  # Член семьи
     # __tablename__ = "persons"
@@ -106,7 +119,19 @@ class Persons(db.Model):  # Член семьи
             ic(e)
             return False
         return True
-        
+
+    def putPerson(per):
+        try:
+            with db.engine.connect() as cn:
+                person = cn.execute(
+                    insert(Persons).values(**per).returning(Persons)
+                ).first()
+                ic(person)
+                cn.commit()
+        except Exception as e:
+            ic(e)
+            return False, None
+        return True, person
 
     def toJson(self):
         return {

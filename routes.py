@@ -51,4 +51,15 @@ def up_get_person(id: int):
 
 @app.route("/person", methods=["PUT"])
 def put_person():
-    return
+    if not request.json:
+        return 404
+    ic(request.json)
+    person = request.json["person"]
+    familyId = int(request.json["familyId"])
+
+    res, person = Persons.putPerson(person)
+    if res:
+        if Families_Persons.putNewMember(person.id, familyId):
+            return "Success", 200
+        return "Bad family id", 400
+    return "Bad person", 400

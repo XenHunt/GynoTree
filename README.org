@@ -14,11 +14,6 @@
 :CUSTOM_ID: содержание
 :END:
 :CONTENTS:
-- [[#основные-функции][Основные функции]]
-  - [[#отображение][Отображение]]
-  - [[#добавление][Добавление]]
-  - [[#редактирование][Редактирование]]
-  - [[#удаление][Удаление]]
 - [[#как-запустить][Как запустить]]
   - [[#бд][БД]]
   - [[#приложение][Приложение]]
@@ -27,57 +22,61 @@
       - [[#стандартный-способ][Стандартный способ]]
 :END:
 
-* Основные функции
-:PROPERTIES:
-:CUSTOM_ID: основные-функции
-:END:
-
-** TODO Отображение
-:PROPERTIES:
-:CUSTOM_ID: отображение
-:END:
-
-** TODO Добавление
-:PROPERTIES:
-:CUSTOM_ID: добавление
-:END:
-
-** TODO Редактирование
-:PROPERTIES:
-:CUSTOM_ID: редактирование
-:END:
-
-** TODO Удаление
-:PROPERTIES:
-:CUSTOM_ID: удаление
-:END:
-
 * Как запустить
 :PROPERTIES:
 :CUSTOM_ID: как-запустить
 :END:
 
-** TODO БД
+** БД
 :PROPERTIES:
 :CUSTOM_ID: бд
 :END:
 
-** TODO Приложение
+Рекомендую использовать porsgresql в docker команда:
+#+begin_src shell
+docker run --name sovkom-postgres -e POSTGRES_PASSWORD=ssss#password \
+-e POSTGRES_USER=secret_admin \
+-e POSTGRES_DB=test-db \
+-v postgres-val-sovkom:/var/lib/postgresql/data \
+-p 5444:5432/tcp \
+-d postgres
+#+end_src
+
+** Приложение
 :PROPERTIES:
 :CUSTOM_ID: приложение
 :END:
 
-*** TODO Установка переменных окружения
+*** Установка переменных окружения
 :PROPERTIES:
 :CUSTOM_ID: установка-переменных-окружения
 :END:
 
-**** TODO direnv
+**** direnv
 :PROPERTIES:
 :CUSTOM_ID: direnv
 :END:
+Просто добавить следуюшие строки в =.envrc=:
+#+begin_src shell
+export DEBUG=TRUE
+export DB_HOST=localhost
+export DB_NAME=test-db
+export DB_USER=secret_admin
+export DB_PORT=5444
+export DB_PASSWORD=ssss#password
+#+end_src
 
-**** TODO Стандартный способ
+И выполнить команду =direnv allow=.
+Затем можно запустить программу;
+#+begin_src shell
+python __init__.py
+#+end_src
+**** Стандартный способ
 :PROPERTIES:
 :CUSTOM_ID: стандартный-способ
 :END:
+
+Нужно либо в терминал вбить команды выше, либо выполнить таким образом
+#+begin_src shell
+DEBUG=<TRUE|FALSE> DB_HOST=... python __init__.py
+#+end_src
